@@ -5,14 +5,14 @@ const router = express.Router();
 
 
 router.get("/", (req, res) => {
-    res.json({status: true, message: "API working"})
+    res.status(200).json({status: 200, message: "API working"})
 })
 
 router.post("/add-employee", (req, res) => {
   employeeTable.findOne({ where: { email: req.body.email }})
     .then((data) => {
       if (data) {
-        return res.json({ status: false, message: "Email already exist" });
+        return res.status(409).json({status: 409, message: "Email already exist"})
       } else {
         employeeTable
           .create({
@@ -22,22 +22,22 @@ router.post("/add-employee", (req, res) => {
             mobile: req.body.mobile,
           })
           .then((success) => {
-            res.json({
-              status: true,
+            res.status(201).json({
+              status: 201,
               message: "Employee added successfully",
             });
           })
           .catch((error) => {
-            res.json({
-              status: false,
+            res.status(500).json({
+              status: 500,
               message: "Employee not added",
             });
           });
         }
     })
     .catch((error) => {
-      res.json({
-        status: false,
+      res.status(500).json({
+        status: 500,
         message: "Something went wrong",
       });
     });
@@ -47,21 +47,21 @@ router.get("/all-employee", (req, res) => {
  employeeTable.findAll()
  .then((data) => {
     if(data){
-        return res.json({
-            status:true,
+        return res.status(200).json({
+            status:200,
             message: data
         })
     }
     else{
-        return res.json({
-            status: true,
+        return res.status(404).json({
+            status: 404,
             message: "No employee found"
         });
     }
  })
  .catch((error) => {
-    res.json({
-        status : false,
+    res.status(500).json({
+        status : 500,
         message : 'Error in fetching data'
     })
  })
@@ -71,21 +71,21 @@ router.get("/get-employee/:id", (req, res) => {
     employeeTable.findOne({ where: { id: req.params.id }})
     .then((data) => {
         if(data){
-            res.json({
-                status: true,
+            res.status(200).json({
+                status: 200,
                 message: data
             })
         }
         else{
-            res.json({
-                status:false,
+            res.status(404).json({
+                status:404,
                 message:"Employee not found!"
             })
         }
     })
     .catch((error) => {
-        res.json({
-            status : false,
+        res.status(500).json({
+            status : 500,
             message: "Error in fetching data"
         })
     })
@@ -106,22 +106,22 @@ router.put("/update-employee/:id", (req, res) => {
                 }
             }).then((data) => {
                 if(data){
-                    res.json({status:true, message: "Employee updated successfully"})
+                    res.status(200).json({status:200, message: "Employee updated successfully"})
                 }
             }).catch((error) => {
-                res.json({status:false, message:"Error in updating data"})
+                res.status(500).json({status:500, message:"Error in updating data"})
             })
         }
         else{
-            res.json({
-                status: false,
+            res.status(404).json({
+                status: 404,
                 message: "No employee found"
             })
         }
     })
     .catch((error) => {
-        res.json({
-            status: false,
+        res.status(500).json({
+            status: 500,
             message: "Something went wrong"
         })
     })
@@ -136,18 +136,18 @@ router.delete("/delete-employee/:id", (req, res) =>{
                     id: req.params.id
                 }
             }).then((data) =>{
-                res.json({status:true, message:"employee deleted successfully"})
+                res.status(200).json({status:200, message:"employee deleted successfully"})
             })
             .catch((error) => {
-                res.json({status:false, message:"employee not deleted"})
+                res.status(500).json({status:500, message:"employee not deleted"})
             })
         }
         else{
-            res.json({status:false, message:"employee not found"})
+            res.status(404).json({status:404, message:"employee not found"})
         }
     })
     .catch((error) =>{
-        res.json({status:false, message: "Something went wrong"})
+        res.status(500).json({status:500, message: "Something went wrong"})
     })
 });
 

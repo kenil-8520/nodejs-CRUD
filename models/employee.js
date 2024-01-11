@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   employee.init({
     name: DataTypes.STRING,
     email: DataTypes.STRING,
-    gener: DataTypes.ENUM("male","female","other"),
+    gender: DataTypes.ENUM("male","female","other"),
     mobile: DataTypes.STRING
   }, {
     sequelize,
