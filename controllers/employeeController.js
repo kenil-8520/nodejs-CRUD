@@ -5,6 +5,16 @@ const Employee = db.employees
 
 const addEmployee = async (req, res) => {
     try {
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ code: 400, message: 'Request body is empty or contains no data' });
+        }
+        const requiredFields = ['name', 'email', 'mobile'];
+
+        for (const field of requiredFields) {
+            if (!req.body[field]) {
+                return res.status(400).json({ code: 400, message: `${field} is required` });
+            }
+        }
         const dataScheme = Yup.object({
         name: Yup.string().required("name is required").matches(/^[aA-zZ\s]+$/, "Only alphabets are allowed in name field"),
         email: Yup.string().email().required('email is required'),
@@ -20,6 +30,7 @@ const addEmployee = async (req, res) => {
             return res.status(422).json({code: 422, message: "Please provide valid 10 digit number"})
         }
         const valdiatedData = await dataScheme.validate(data)
+        console.log(valdiatedData);
         if(!valdiatedData){
             return res.status(400).send({
                 message:'Data not valid'
@@ -101,8 +112,7 @@ const updateEmployee = async (req, res) => {
         }
     }
     catch(error){
-        const errors = error.errors[0]?.message || error.message || error.errors;
-        res.status(500).json({ code: 500, message: errors });
+        res.status(500).json({ code: 500, message: "something went wrong" });
     }
 };
 
