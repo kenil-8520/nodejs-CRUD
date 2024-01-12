@@ -6,12 +6,9 @@ const Employee = db.employees
 const addEmployee = async (req, res) => {
     try {
         const dataScheme = Yup.object({
-        name: Yup.string().required("name is required").matches(/^[aA-zZ\s]+$/, "Only alphabets are allowed for this field "),
+        name: Yup.string().required("name is required").matches(/^[aA-zZ\s]+$/, "Only alphabets are allowed in name field"),
         email: Yup.string().email().required('email is required'),
-        mobile: Yup.number().max(10,"number must be 10 digit number").required('Mobile is required')
-        .typeError("That doesn't look like a phone number")
-        .positive("A phone number can't start with a minus")
-        .integer("A phone number can't include a decimal point"),
+        mobile: Yup.number().required('mobile is required'),
         })
 
         const data = {
@@ -19,11 +16,13 @@ const addEmployee = async (req, res) => {
             email: req.body.email,
             mobile: req.body.mobile
         }
+        if(data.mobile.length !== 10){
+            return res.status(422).json({code: 422, message: "Please provide valid 10 digit number"})
+        }
         const valdiatedData = await dataScheme.validate(data)
-
         if(!valdiatedData){
             return res.status(400).send({
-                message:'data not valid'
+                message:'Data not valid'
             })
         }
         await Employee.create(data)
@@ -47,8 +46,8 @@ const listEmployee = async (req, res) => {
 }
 
 const getEmployee = async (req, res) => {
-    const id = req.params.id
     try{
+        const id = req.params.id
         const data = await Employee.findOne({ where: {id: id} })
         return res.status(200).json({code:200, data})
     }
@@ -61,37 +60,55 @@ const getEmployee = async (req, res) => {
 }
 
 const updateEmployee = async (req, res) => {
-    const id = req.params.id
-
-    const dataScheme = Yup.object({
-        name: Yup.string(),
-        email: Yup.string().email(),
-        mobile: Yup.number().min(10,'number should be 10').max(12, 'number should be 10')
-        })
-
-    const employee = await Employee.findOne({ where: {id: id} })
-    if(!employee){
-        res.status(404).json({code:404, message:"No employee with this id"})
-    }
-    const valdiatedData = await dataScheme.validate(data)
-    if(!valdiatedData){
-        return res.status(400).send({
-            message:'data not valid'
-        })
-    }
     try{
-        await Employee.update(req.body, { where: { id: id }})
-        res.status(200).json({code: 200, message: "Employee updated successfully"})
+        const id = req.params.id;
+        const data = {
+            name: req.body.name,
+            email: req.body.email,
+            mobile: req.body.mobile
+        };
+
+        const dataScheme = Yup.object({
+            name: Yup.string().matches(/^[aA-zZ\s]+$/, "Only alphabets are allowed in the name field"),
+            email: Yup.string().email(),
+            mobile: Yup.number()
+        });
+
+        try {
+            await dataScheme.validate(data);
+        } catch (validationError) {
+            return res.status(400).json({
+                code: 400, message: validationError.errors[0]
+            });
+        }
+
+        if (data.mobile.length !== 10) {
+            return res.status(422).json({ code: 422, message: "Please provide a valid 10-digit number" });
+        }
+
+        const employee = await Employee.findOne({ where: { id: id } });
+
+        if (!employee) {
+            return res.status(404).json({ code: 404, message: "No employee with this id" });
+        }
+
+        try {
+            await Employee.update(req.body, { where: { id: id } });
+            res.status(200).json({ code: 200, message: "Employee updated successfully" });
+        } catch (error) {
+            const errors = error.errors[0]?.message || error.message || error.errors;
+            res.status(500).json({ code: 500, message: errors });
+        }
     }
-    catch(error) {
-        const errors = error.errors[0]?.message || error.message?.errors || error.errors;
-        res.status(500).json({code:500, message: errors})
+    catch(error){
+        const errors = error.errors[0]?.message || error.message || error.errors;
+        res.status(500).json({ code: 500, message: errors });
     }
-}
+};
 
 const deleteEmployee = async (req, res) => {
-    const id = req.params.id;
     try{
+        const id = req.params.id;
         const data = await Employee.destroy({ where: { id: id }} )
         if(!data){
             res.status(404).json({code:404, message:"Employee not found"})
