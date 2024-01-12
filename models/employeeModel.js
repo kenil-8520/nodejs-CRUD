@@ -15,6 +15,6 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
             allowNull: false
         },
-    })
+    },)
     return employee
 }
