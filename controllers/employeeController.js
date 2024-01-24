@@ -17,7 +17,7 @@ const addEmployee = async (req, res) => {
     }
     const dataScheme = Yup.object({
       name: Yup.string().required("Name is required").matches(/^[aA-zZ\s]+$/, "Only alphabets are allowed in name field"),
-      email: Yup.string().email().required("Email is required"),
+      email: Yup.string().matches(/^[^\d\s@][^\s@]*@[^\s@]+\.[^\s@]+$/).required("Email is required"),
       mobile: Yup.number().integer("A phone number can't include a decimal point").positive("A phone number can't be negative")
     });
 
@@ -86,7 +86,8 @@ const updateEmployee = async (req, res) => {
 
     const dataScheme = Yup.object({
       name: Yup.string().matches(/^[aA-zZ\s]+$/,"Only alphabets are allowed in the name field"),
-      email: Yup.string().email(),
+    //   email: Yup.string().matches(/^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/),
+      email: Yup.string().matches(/^[^\d\s@][^\s@]*@[^\s@]+\.[^\s@]+$/),
       mobile: Yup.number().integer("A phone number can't include a decimal point").positive("A phone number can't be negative"),
     });
 
@@ -97,6 +98,9 @@ const updateEmployee = async (req, res) => {
     try {
       await dataScheme.validate(data);
     } catch (validationError) {
+        if (validationError && validationError.errors.includes("email must match the following: \"/^[^\\d\\s@][^\\s@]*@[^\\s@]+\\.[^\\s@]+$/\"")) {
+            return res.status(400).json({ success:false, message: 'Invalid email format' });
+          }
       return res.status(400).json({ success: false, message: validationError.errors[0] });
     }
 
@@ -121,6 +125,9 @@ const updateEmployee = async (req, res) => {
       const errors = error.message || error.errors[0]?.message || error.message || error.errors || error;
       if (error.message && error.message.includes("Truncated incorrect DOUBLE value")) {
         return res.status(500).json({ success:false, error: 'Invalid employee ID' });
+      }
+      else if (error.message && error.message.includes("Validation error")) {
+        return res.status(500).json({ success:false, error: 'Email already exists' });
       }
       return res.status(500).json({ success: false, message: errors });
     }
