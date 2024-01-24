@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         mobile: {
             type: DataTypes.STRING(15),
             unique: true,
-            allowNull: false
+            allowNull: true
         },
     },)
     return employee
