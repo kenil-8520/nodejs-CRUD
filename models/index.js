@@ -25,6 +25,7 @@ db.sequelize = Sequelize
 db.sequelize = sequelize
 
 db.employees = require('./employeeModel.js')(sequelize, DataTypes)
+db.user = require('./userModel.js')(sequelize, DataTypes)
 
 db.sequelize.sync({ force:false })
 

@@ -17,11 +17,13 @@ app.get('/', (req, res) =>{
 })
 
 
-const router = require('./routes/employeeRouter.js')
-app.use('/api', router)
+const employeerouter = require('./routes/employeeRouter.js')
+const authrouter = require('./routes/authRoute.js')
+
+app.use('/api', employeerouter)
+app.use('/api', authrouter)
 
 const PORT = 8080
-
 
 
 app.listen(PORT, () => {
